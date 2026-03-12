@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Presales AI</title>
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg: #0a1628;
+  --bg2: #0d2137;
+  --blue: #0ea5e9;
+  --blue2: #3b82f6;
+  --text: #e2e8f0;
+  --text2: #7dd3fc;
+  --border: rgba(56,189,248,0.2);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html {
+  height: 100%;
+  background: var(--bg);
+}
+
+body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, var(--bg) 0%, var(--bg2) 50%, var(--bg) 100%);
+  color: var(--text);
+  font-family: -apple-system, 'Segoe UI', Tahoma, sans-serif;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== LOGIN ===== */
+#login-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  padding-top: calc(20px + var(--safe-top));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.login-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 32px 24px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.login-logo {
+  width: 60px; height: 60px;
+  background: linear-gradient(135deg, var(--blue), var(--blue2));
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  margin: 0 auto 16px;
+  box-shadow: 0 0 30px rgba(14,165,233,0.4);
+}
+
+.login-title { font-size: 20px; font-weight: 700; color: #f0f9ff; margin-bottom: 4px; }
+.login-sub { font-size: 13px; color: var(--text2); margin-bottom: 24px; }
+.login-label { font-size: 12px; color: #94a3b8; margin-bottom: 8px; text-align: right; }
+
+.login-input {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(56,189,248,0.3);
+  border-radius: 14px;
+  color: var(--text);
+  font-size: 16px; /* 16px prevents iOS zoom */
+  outline: none;
+  direction: rtl;
+  text-align: right;
+  margin-bottom: 10px;
+  font-family: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.login-input:focus { border-color: rgba(56,189,248,0.7); }
+
+.login-error { color: #f87171; font-size: 12px; margin-bottom: 10px; display: none; text-align: right; }
+
+.login-btn {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, var(--blue), var(--blue2));
+  border: none; border-radius: 14px;
+  color: #fff; font-size: 16px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  box-shadow: 0 4px 20px rgba(14,165,233,0.4);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.login-hint { font-size: 11px; color: rgba(125,211,252,0.4); margin-top: 14px; line-height: 1.5; }
+
+/* ===== CHAT ===== */
+#chat-screen {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(90deg, #1a3a5c, var(--bg2));
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  padding-top: calc(12px + var(--safe-top));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+.h-logo {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--blue), var(--blue2));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; flex-shrink: 0;
+}
+
+.h-info { flex: 1; min-width: 0; }
+.h-title { font-size: 14px; font-weight: 700; color: #f0f9ff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.h-sub { font-size: 10px; color: var(--text2); }
+
+.h-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.logout-btn {
+  background: rgba(56,189,248,0.1);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.status-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+  animation: pulse 2s infinite;
+  flex-shrink: 0;
+}
+
+/* Messages */
+#messages {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+.row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  animation: fadein 0.2s ease;
+}
+.row.user { flex-direction: row-reverse; }
+
+.avatar {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+.avatar.bot { background: linear-gradient(135deg, var(--blue), var(--blue2)); }
+.avatar.user { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+
+.bubble {
+  max-width: calc(100% - 50px);
+  padding: 10px 14px;
+  font-size: 14px;
+  line-height: 1.7;
+  direction: rtl;
+  text-align: right;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.bubble.bot {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(56,189,248,0.15);
+  border-radius: 16px 16px 16px 4px;
+  color: var(--text);
+}
+.bubble.user {
+  background: linear-gradient(135deg, var(--blue), var(--blue2));
+  border-radius: 16px 16px 4px 16px;
+  color: #fff;
+}
+.bubble.err {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 16px 16px 16px 4px;
+  color: #fca5a5;
+}
+
+.typing-bbl {
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(56,189,248,0.15);
+  border-radius: 16px 16px 16px 4px;
+  display: flex; gap: 5px; align-items: center;
+}
+.dot {
+  width: 7px; height: 7px;
+  border-radius: 50%; background: var(--blue);
+}
+.dot:nth-child(1){animation:bounce 1.4s ease-in-out 0s infinite}
+.dot:nth-child(2){animation:bounce 1.4s ease-in-out .16s infinite}
+.dot:nth-child(3){animation:bounce 1.4s ease-in-out .32s infinite}
+
+/* Suggestions */
+#suggestions {
+  padding: 6px 12px 8px;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 7px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+#suggestions::-webkit-scrollbar { display: none; }
+
+.sq {
+  padding: 7px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(56,189,248,0.3);
+  background: rgba(14,165,233,0.08);
+  color: var(--text2);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Input */
+.input-area {
+  padding: 8px 12px;
+  padding-bottom: calc(10px + var(--safe-bottom));
+  background: rgba(13,33,55,0.97);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.input-box {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(56,189,248,0.25);
+  border-radius: 20px;
+  padding: 8px 12px;
+}
+.input-box:focus-within { border-color: rgba(56,189,248,0.5); }
+
+#user-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 16px; /* prevents iOS zoom */
+  resize: none;
+  font-family: inherit;
+  line-height: 1.5;
+  direction: rtl;
+  text-align: right;
+  max-height: 100px;
+  overflow-y: auto;
+  padding: 2px 0;
+  min-height: 24px;
+  -webkit-appearance: none;
+}
+#user-input::placeholder { color: rgba(125,211,252,0.4); }
+
+#send-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, var(--blue), var(--blue2));
+  color: #fff;
+  cursor: pointer;
+  font-size: 15px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 10px rgba(14,165,233,0.4);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+#send-btn:disabled { background: rgba(56,189,248,0.2); box-shadow: none; }
+
+/* Key section */
+#key-section { display: none; margin-top: 4px; }
+.key-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(56,189,248,0.3);
+  border-radius: 14px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: monospace;
+  outline: none;
+  direction: ltr;
+  text-align: left;
+  margin-bottom: 6px;
+  -webkit-appearance: none;
+}
+.key-hint { font-size: 11px; color: rgba(125,211,252,0.45); margin-bottom: 12px; text-align: right; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.3); border-radius: 2px; }
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-7px)} }
+@keyframes fadein { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card" id="login-card">
+    <div class="login-logo">🔐</div>
+    <div class="login-title">Presales AI Assistant</div>
+    <div class="login-sub">مساعد فريق ما قبل البيع الذكي</div>
+
+    <div class="login-label">🔑 كلمة المرور</div>
+    <input type="password" id="pw-input" class="login-input" placeholder="أدخل كلمة المرور" autocomplete="off"/>
+    <div id="pw-err" class="login-error">⚠️ كلمة المرور غير صحيحة</div>
+
+    <div id="key-section">
+      <div class="login-label">🔐 API Key (مرة واحدة فقط)</div>
+      <input type="password" id="key-input" class="key-input" placeholder="sk-ant-api03-..." autocomplete="off"/>
+      <div class="key-hint">تُحفظ تلقائياً ولن تُطلب مجدداً ✅</div>
+    </div>
+
+    <button class="login-btn" id="login-btn" onclick="doLogin()">دخول ←</button>
+    <div class="login-hint">🔒 مخصص لفريق Presales الداخلي فقط</div>
+  </div>
+</div>
+
+<!-- CHAT -->
+<div id="chat-screen">
+  <div class="header">
+    <div class="h-logo">🎯</div>
+    <div class="h-info">
+      <div class="h-title">Presales AI Assistant</div>
+      <div class="h-sub">الدليل الرسمي لفريق ما قبل البيع</div>
+    </div>
+    <div class="h-actions">
+      <button class="logout-btn" onclick="doLogout()">خروج</button>
+      <div class="status-dot"></div>
+    </div>
+  </div>
+
+  <div id="messages"></div>
+
+  <div id="suggestions">
+    <button class="sq" onclick="qs(this)">دور Presales</button>
+    <button class="sq" onclick="qs(this)">Red Flags</button>
+    <button class="sq" onclick="qs(this)">خطوات Handover</button>
+    <button class="sq" onclick="qs(this)">تصنيف TA</button>
+    <button class="sq" onclick="qs(this)">رفض Handover</button>
+    <button class="sq" onclick="qs(this)">Sales vs Presales</button>
+    <button class="sq" onclick="qs(this)">متطلبات Quotation</button>
+    <button class="sq" onclick="qs(this)">Microsoft Cloud</button>
+  </div>
+
+  <div class="input-area">
+    <div class="input-box">
+      <button id="send-btn" onclick="send()">➤</button>
+      <textarea id="user-input" rows="1" placeholder="اكتب سؤالك هنا..."></textarea>
+    </div>
+  </div>
+</div>
+
+<script>
+const _p = 'Presales@2025';
+function getKey() { try { return localStorage.getItem('_psk') || ''; } catch(e){ return ''; } }
+function saveKey(k) { try { localStorage.setItem('_psk', k); } catch(e){} }
+
+let history = [];
+let busy = false;
+
+const KB = `دليل موظف ما قبل البيع - Presales Team Knowledge Base
+
+المقدمة والغرض:
+تم إعداد هذا الدليل لمساعدة فريق Presales على العمل بكفاءة ووضوح.
+يهدف إلى تمكين فريق Presales من التركيز على: Discovery, Solution Design, Value & ROI, Risk & Feasibility.
+
+هدف Presales:
+- حماية وقت Presales للأعمال عالية التأثير
+- منع الالتزامات غير الموثقة
+- توضيح الملكية Ownership لكل نشاط
+
+الرؤية والرسالة:
+- Presales ينجح عندما يركز على القيمة وليس عندما يساعد في كل شيء
+- حسن النية لا تساوي قيمة
+
+دور Presales المسؤوليات الأساسية:
+1. Discovery: اكتشاف احتياجات العميل التقنية والتجارية، توثيق المتطلبات، تحديد In/Out of Scope
+2. Solution Design: تصميم الحل، المعمارية، التكاملات والقيود
+3. Value & ROI: ربط الحل بقيمة الأعمال والـ Outcomes
+4. Risk & Feasibility: توضيح المخاطر التقنية والتشغيلية وحدود المنتج
+5. تحويل المتطلبات إلى قصة تدعم القرار
+6. دعم المبيعات والتسليم
+
+تصنيف الطلبات:
+- تقني/حل → Presales
+- تنفيذي/تنفيذ → Delivery
+- تجاري/سعر/عقد → Sales/Finance/Legal
+
+ما هو خارج نطاق Presales:
+- التسعير النهائي والموافقة على الخصومات
+- إدارة العقود والمراجعات القانونية
+- تسجيل الموردين ومتابعة المشتريات
+- إدارة المشاريع وطلبات التغيير
+- الموافقات الداخلية
+
+Red Flags:
+تعريف: أي طلب يتطلب من فريق Presales الالتزام بشيء لا يمكنه ضمانه.
+أمثلة:
+- تعبئة نماذج الموردين غير التقنية مثل NDA
+- تقديم وعود للعميل أو تحديد سعر أو التفاوض
+- متابعة Procurement لإصدار PO
+- تنفيذ طلب استثنائي تحت ضغط
+
+الإجراء الفوري Stop Clarify Redirect:
+1. وضح: هل هذا تجاري أو تقني؟
+2. حول الملكية للشخص الصحيح
+
+Handover Guide:
+خطوات Handover:
+1. مشاركة جميع المستندات ذات الصلة
+2. التأكد من حضور AM, PM, Technical Lead, Supervision
+3. شرح الحل: What was promised, In scope, Out of scope, Assumptions & Risks
+4. تأكيد الالتزامات والحدود
+
+رسائل Handover الخمس:
+- الرسالة 1: التأكد من تواجد AM, PM, Technical Lead, Supervision
+- الرسالة 2: السياق التجاري ومبررات اتخاذ القرار
+- الرسالة 3: وضوح نطاق التنفيذ ومراحله
+- الرسالة 4: تحديد المخاطر وخطط مواجهتها mitigation plan
+- الرسالة 5: الإفصاح عن التزامات مدير الحساب خلال Bidding phase
+
+مثال اعتذار عند غياب أصحاب المصلحة:
+أشكركم على الدعوة، ونظراً لعدم توفر الأطراف الأساسية أقترح إعادة جدولة الموعد.
+
+Use Cases Handover:
+1. غياب أصحاب المصلحة → ضمان حضور الجميع وإعادة الجدولة مهنياً
+2. فريق التنفيذ لا يمتلك الخلفية التجارية → شرح سبب اختيار الحل
+3. وضوح نطاق التنفيذ → عرض خارطة طريق التنفيذ
+4. وضوح المخاطر → توضيح المخاطر المعروفة واقتراح التخفيف
+5. التزامات مدير الحساب → مشاركة جميع الالتزامات والمراسلات
+
+Quotation Guide:
+متطلبات إلزامية في أي Quote:
+1. تطابق كامل مع TA بنسبة 100% الوصف والكمية وسعر الوحدة
+2. وضوح في Line Items: نوع البند Hardware/Software/Services/Support/Training
+3. Quote نهائي ورسمي بصيغة PDF بدون مسودات وصلاحية واضحة
+
+Classification Guide:
+أقسام TA الثلاثة:
+1. Inhouse Special: Category يبدأ بـ ESS أو CLD، Vendor STC أو STCS، عملة ريال سعودي
+2. Inhouse Un-margined Items: Vendor STC أو STCS، عملة ريال سعودي
+3. Solutions Un-margined Items: Vendor لا يكون STC أو STCS
+
+دليل تصنيف Scope:
+- HW/SW + TSS بدون MS & SLA → System Integration
+- HW/SW/PS + TSS مع MS & SLA → System Integration + Managed Services
+- Manpower/Training بدون SLA → Outsourcing Services
+- Microsoft on Prime → System Integration
+- Microsoft on Cloud → Cloud
+- تطبيقات أو تراخيص على Cloud → Cloud
+
+Nile Quote: Managed Services → Managed Network Services → Nile
+MRC: GL Code 6001119 / OTC: GL Code 6001219
+
+Q&A الشائعة:
+الفرق بين Sales وPresales:
+Sales يملك النتيجة التجارية. Presales يملك نتيجة الحل.
+هل يمكن رفض Handover: نعم إذا كان أصحاب المصلحة غير حاضرين.
+لماذا تجنب مناقشة السعر: Presales لا يملك صلاحية تحديد الأسعار.
+عند الضغط لإعطاء تاريخ تسليم: اربطه بمرحلة Discovery وتأكيد فريق Delivery.`;
+
+const SYS = `أنت مساعد ذكي متخصص في دعم فريق Presales. أجب بناءً على الدليل الرسمي فقط.\n\n${KB}\n\nقواعد الأمان:\n- لا تذكر أسماء شركات أو عملاء فعليين\n- لا تذكر أسعار أو أرقام مالية فعلية\n- أجب بلغة السؤال عربي أو إنجليزي\n- إذا لم تجد إجابة اقترح استشارة المدير المباشر`;
+
+const BLOCKED = [/password|كلمة\s*مرور/i,/ignore.*(previous|instructions|system)/i,/تجاهل.*(التعليمات|النظام)/i,/act as|pretend (you are|to be)/i];
+function checkBlock(t) { return BLOCKED.some(p=>p.test(t)); }
+function fmt(t) { return t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>'); }
+
+function addMsg(role, text, isErr=false) {
+  const msgs = document.getElementById('messages');
+  if(role==='user') document.getElementById('suggestions').style.display='none';
+  const row = document.createElement('div');
+  row.className = 'row '+role;
+  const av = document.createElement('div');
+  av.className = 'avatar '+(role==='user'?'user':'bot');
+  av.textContent = role==='user'?'👤':'🎯';
+  const bub = document.createElement('div');
+  bub.className = 'bubble '+(isErr?'err':role);
+  bub.innerHTML = fmt(text);
+  if(role==='user'){ row.appendChild(av); row.appendChild(bub); }
+  else { row.appendChild(av); row.appendChild(bub); }
+  msgs.appendChild(row);
+  setTimeout(()=>{ msgs.scrollTop = msgs.scrollHeight; }, 50);
+}
+
+function showTyping() {
+  const msgs = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className='row bot'; d.id='typing';
+  d.innerHTML='<div class="avatar bot">🎯</div><div class="typing-bbl"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+  msgs.appendChild(d);
+  setTimeout(()=>{ msgs.scrollTop=msgs.scrollHeight; },50);
+}
+function hideTyping(){ const t=document.getElementById('typing'); if(t)t.remove(); }
+
+function openChat(msg) {
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('chat-screen').style.display='flex';
+  sessionStorage.setItem('auth','1');
+  addMsg('bot', msg);
+}
+
+function doLogin() {
+  const val = document.getElementById('pw-input').value.trim();
+  const err = document.getElementById('pw-err');
+  const card = document.getElementById('login-card');
+
+  if(val !== _p) {
+    err.style.display='block';
+    document.getElementById('pw-input').value='';
+    card.style.animation='shake 0.4s ease';
+    setTimeout(()=>card.style.animation='',400);
+    return;
+  }
+  err.style.display='none';
+
+  if(getKey()) {
+    openChat('مرحباً! أنا مساعدك الذكي لفريق Presales 👋\n\nيمكنك سؤالي عن أي شيء يخص: دور Presales، Red Flags، Handover، Quotation، Classification.');
+  } else {
+    const ks = document.getElementById('key-section');
+    if(ks.style.display==='none'||ks.style.display==='') {
+      ks.style.display='block';
+      document.getElementById('login-btn').textContent='حفظ والدخول ←';
+      document.getElementById('key-input').focus();
+    } else {
+      const key = document.getElementById('key-input').value.trim();
+      if(!key.startsWith('sk-')) {
+        document.getElementById('key-input').style.borderColor='rgba(239,68,68,0.7)';
+        return;
+      }
+      saveKey(key);
+      openChat('مرحباً! أنا مساعدك الذكي لفريق Presales 👋\n\nتم حفظ الإعدادات. يمكنك سؤالي عن: دور Presales، Red Flags، Handover، Quotation، Classification.');
+    }
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('auth');
+  history=[];
+  document.getElementById('chat-screen').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('pw-input').value='';
+  document.getElementById('messages').innerHTML='';
+  document.getElementById('suggestions').style.display='flex';
+  document.getElementById('login-btn').textContent='دخول ←';
+  document.getElementById('key-section').style.display='none';
+}
+
+function qs(btn) {
+  document.getElementById('user-input').value=btn.textContent;
+  send();
+}
+
+async function send() {
+  if(busy) return;
+  const inp = document.getElementById('user-input');
+  const txt = inp.value.trim();
+  if(!txt) return;
+
+  if(checkBlock(txt)) {
+    addMsg('user',txt);
+    inp.value=''; inp.style.height='auto';
+    addMsg('bot','⛔ هذا الطلب محظور. تواصل مع مديرك المباشر.',true);
+    return;
+  }
+
+  addMsg('user',txt);
+  inp.value=''; inp.style.height='auto';
+  busy=true;
+  document.getElementById('send-btn').disabled=true;
+  showTyping();
+  history.push({role:'user',content:txt});
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':getKey(),
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',
+        max_tokens:1000,
+        system:SYS,
+        messages:history
+      })
+    });
+    const data = await res.json();
+    hideTyping();
+    if(!res.ok) {
+      addMsg('bot','⚠️ خطأ: '+(data?.error?.message||'خطأ غير معروف'),true);
+      history.pop();
+    } else {
+      const reply = data.content?.map(b=>b.text||'').join('')||'لم أتمكن من الإجابة.';
+      addMsg('bot',reply);
+      history.push({role:'assistant',content:reply});
+    }
+  } catch(e) {
+    hideTyping();
+    addMsg('bot','⚠️ حدث خطأ في الاتصال. تأكد من الإنترنت.',true);
+    history.pop();
+  }
+  busy=false;
+  document.getElementById('send-btn').disabled=false;
+}
+
+window.addEventListener('load',()=>{
+  if(sessionStorage.getItem('auth')==='1'&&getKey()) {
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('chat-screen').style.display='flex';
+    addMsg('bot','مرحباً مجدداً! كيف يمكنني مساعدتك؟ 🎯');
+  }
+
+  document.getElementById('pw-input').addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();doLogin();}
+  });
+  document.getElementById('key-input').addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();doLogin();}
+  });
+
+  const inp = document.getElementById('user-input');
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}
+  });
+  inp.addEventListener('input',()=>{
+    inp.style.height='auto';
+    inp.style.height=Math.min(inp.scrollHeight,100)+'px';
+  });
+
+  // Fix iOS viewport when keyboard opens
+  if(/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+    inp.addEventListener('focus',()=>{
+      setTimeout(()=>{
+        document.getElementById('messages').scrollTop=999999;
+      },300);
+    });
+  }
+});
+</script>
+</body>
+</html>
