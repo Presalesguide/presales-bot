@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Presales AI Assistant</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  height: 100vh; display: flex; flex-direction: column;
+  background: linear-gradient(135deg, #0a1628 0%, #0d2137 50%, #0a1628 100%);
+  color: #e2e8f0; overflow: hidden;
+}
+
+/* LOGIN */
+#login-screen {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: 100vh; padding: 24px;
+}
+.login-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(56,189,248,0.25);
+  border-radius: 20px; padding: 40px;
+  width: 100%; max-width: 420px; text-align: center;
+}
+.login-logo {
+  width: 64px; height: 64px;
+  background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+  border-radius: 16px; display: flex; align-items: center;
+  justify-content: center; font-size: 28px;
+  margin: 0 auto 20px;
+  box-shadow: 0 0 30px rgba(14,165,233,0.4);
+}
+.login-title { font-size: 22px; font-weight: 700; color: #f0f9ff; margin-bottom: 6px; }
+.login-sub { font-size: 13px; color: #7dd3fc; margin-bottom: 28px; }
+.login-label { font-size: 13px; color: #94a3b8; margin-bottom: 8px; text-align: right; }
+.login-input {
+  width: 100%; padding: 12px 16px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(56,189,248,0.3);
+  border-radius: 12px; color: #e2e8f0;
+  font-size: 15px; outline: none;
+  direction: rtl; text-align: right;
+  margin-bottom: 8px; font-family: inherit;
+  letter-spacing: 3px;
+}
+.login-input:focus { border-color: rgba(56,189,248,0.7); }
+.login-error {
+  color: #f87171; font-size: 12px;
+  margin-bottom: 12px; display: none; text-align: right;
+}
+.login-btn {
+  width: 100%; padding: 13px;
+  background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+  border: none; border-radius: 12px;
+  color: #fff; font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(14,165,233,0.4);
+  font-family: inherit;
+}
+.login-btn:hover { transform: translateY(-1px); }
+.login-hint { font-size: 11px; color: rgba(125,211,252,0.45); margin-top: 14px; }
+
+/* CHAT */
+#chat-screen { display: none; flex-direction: column; height: 100vh; }
+
+.header {
+  background: linear-gradient(90deg, #1a3a5c 0%, #0d2137 100%);
+  border-bottom: 1px solid rgba(56,189,248,0.2);
+  padding: 14px 20px; display: flex; align-items: center; gap: 14px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3); flex-shrink: 0;
+}
+.h-logo {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+  border-radius: 11px; display: flex; align-items: center;
+  justify-content: center; font-size: 20px;
+  box-shadow: 0 0 20px rgba(14,165,233,0.4); flex-shrink: 0;
+}
+.h-title { font-size: 16px; font-weight: 700; color: #f0f9ff; }
+.h-sub { font-size: 11px; color: #7dd3fc; margin-top: 2px; }
+.h-right { margin-right: auto; display: flex; align-items: center; gap: 10px; }
+.logout-btn {
+  background: rgba(56,189,248,0.1);
+  border: 1px solid rgba(56,189,248,0.2);
+  color: #7dd3fc; padding: 5px 12px;
+  border-radius: 8px; font-size: 11px;
+  cursor: pointer; font-family: inherit;
+}
+.logout-btn:hover { background: rgba(56,189,248,0.2); }
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #22c55e; box-shadow: 0 0 8px #22c55e;
+  animation: pulse 2s infinite;
+}
+.status-txt { font-size: 11px; color: #86efac; }
+
+#messages {
+  flex: 1; overflow-y: auto; padding: 20px 16px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.row { display: flex; align-items: flex-end; gap: 10px; animation: fadein 0.25s ease; }
+.row.user { flex-direction: row-reverse; }
+.avatar {
+  width: 34px; height: 34px; flex-shrink: 0;
+  border-radius: 10px; display: flex; align-items: center;
+  justify-content: center; font-size: 15px;
+}
+.avatar.bot { background: linear-gradient(135deg, #0ea5e9, #3b82f6); }
+.avatar.user { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+.bubble {
+  max-width: 72%; padding: 12px 16px;
+  font-size: 14px; line-height: 1.75;
+  direction: rtl; text-align: right;
+}
+.bubble.bot {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(56,189,248,0.15);
+  border-radius: 18px 18px 18px 4px; color: #e2e8f0;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+.bubble.user {
+  background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+  border-radius: 18px 18px 4px 18px; color: #fff;
+  box-shadow: 0 4px 15px rgba(14,165,233,0.3);
+}
+.bubble.err {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 18px 18px 18px 4px; color: #fca5a5;
+}
+.typing-bbl {
+  padding: 14px 18px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(56,189,248,0.15);
+  border-radius: 18px 18px 18px 4px;
+  display: flex; gap: 5px; align-items: center;
+}
+.dot {
+  width: 8px; height: 8px; border-radius: 50%; background: #0ea5e9;
+}
+.dot:nth-child(1){animation:bounce 1.4s ease-in-out 0s infinite}
+.dot:nth-child(2){animation:bounce 1.4s ease-in-out .16s infinite}
+.dot:nth-child(3){animation:bounce 1.4s ease-in-out .32s infinite}
+
+#suggestions {
+  padding: 0 16px 12px; display: flex;
+  flex-wrap: wrap; gap: 8px; justify-content: center; flex-shrink: 0;
+}
+.sq {
+  padding: 7px 14px; border-radius: 20px;
+  border: 1px solid rgba(56,189,248,0.3);
+  background: rgba(14,165,233,0.08); color: #7dd3fc;
+  font-size: 12px; cursor: pointer; font-family: inherit;
+  transition: all 0.2s;
+}
+.sq:hover { background: rgba(14,165,233,0.2); border-color: rgba(56,189,248,0.6); }
+
+.input-area {
+  padding: 12px 16px 16px;
+  background: rgba(13,33,55,0.95);
+  border-top: 1px solid rgba(56,189,248,0.15);
+  flex-shrink: 0;
+}
+.input-box {
+  display: flex; gap: 10px; align-items: flex-end;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(56,189,248,0.25);
+  border-radius: 16px; padding: 8px 12px;
+}
+.input-box:focus-within { border-color: rgba(56,189,248,0.5); }
+#user-input {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: #e2e8f0; font-size: 14px; resize: none;
+  font-family: inherit; line-height: 1.6;
+  direction: rtl; text-align: right;
+  max-height: 120px; overflow-y: auto; padding: 4px 0; min-height: 28px;
+}
+#user-input::placeholder { color: rgba(125,211,252,0.4); }
+#send-btn {
+  width: 40px; height: 40px; border-radius: 10px; border: none;
+  background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+  color: #fff; cursor: pointer; font-size: 16px; flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(14,165,233,0.4); transition: all 0.2s;
+}
+#send-btn:disabled { background: rgba(56,189,248,0.2); cursor:not-allowed; box-shadow:none; }
+.input-footer { text-align:center; font-size:10px; color:rgba(125,211,252,0.35); margin-top:6px; }
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:rgba(56,189,248,0.3);border-radius:2px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-8px)}}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-8px)}80%{transform:translateX(8px)}}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card" id="login-card">
+    <div class="login-logo">🔐</div>
+    <div class="login-title">Presales AI Assistant</div>
+    <div class="login-sub">مساعد فريق ما قبل البيع الذكي</div>
+    <div class="login-label">🔑 كلمة المرور</div>
+    <input type="password" id="pw-input" class="login-input" placeholder="••••••••••" autocomplete="off"/>
+    <div id="pw-err" class="login-error">⚠️ كلمة المرور غير صحيحة، حاول مجدداً</div>
+
+    <div id="key-section" style="display:none;">
+      <div class="login-label" style="margin-top:12px;">🔐 API Key (مرة واحدة فقط)</div>
+      <input type="password" id="key-input" class="login-input" placeholder="أدخل الـ API Key..." autocomplete="off" style="letter-spacing:1px;font-family:monospace;font-size:12px;"/>
+      <div style="font-size:11px;color:rgba(125,211,252,0.5);margin-top:-4px;margin-bottom:12px;text-align:right;">تُحفظ تلقائياً ولن تُطلب مجدداً</div>
+    </div>
+
+    <button class="login-btn" onclick="doLogin()">دخول ←</button>
+    <div class="login-hint">🔒 هذا التطبيق مخصص لفريق Presales الداخلي فقط</div>
+  </div>
+</div>
+
+<div id="chat-screen">
+  <div class="header">
+    <div class="h-logo">🎯</div>
+    <div>
+      <div class="h-title">Presales AI Assistant</div>
+      <div class="h-sub">مساعد فريق ما قبل البيع • الدليل الرسمي</div>
+    </div>
+    <div class="h-right">
+      <button class="logout-btn" onclick="doLogout()">🚪 خروج</button>
+      <div class="status-dot"></div>
+      <span class="status-txt">متصل</span>
+    </div>
+  </div>
+
+  <div id="messages"></div>
+
+  <div id="suggestions">
+    <button class="sq" onclick="qs(this)">ما هو دور Presales؟</button>
+    <button class="sq" onclick="qs(this)">كيف أتعامل مع Red Flag؟</button>
+    <button class="sq" onclick="qs(this)">خطوات Handover الصحيحة</button>
+    <button class="sq" onclick="qs(this)">كيف أصنف بنداً في TA؟</button>
+    <button class="sq" onclick="qs(this)">متى أرفض اجتماع Handover؟</button>
+    <button class="sq" onclick="qs(this)">الفرق بين Sales وPresales</button>
+    <button class="sq" onclick="qs(this)">متطلبات Quotation الإلزامية</button>
+    <button class="sq" onclick="qs(this)">Microsoft on Prime أم Cloud؟</button>
+  </div>
+
+  <div class="input-area">
+    <div class="input-box">
+      <textarea id="user-input" rows="1" placeholder="اكتب سؤالك هنا... (Enter للإرسال)"></textarea>
+      <button id="send-btn" onclick="send()">➤</button>
+    </div>
+    <div class="input-footer">المعلومات مستندة إلى الدليل الرسمي لفريق Presales • للحالات الاستثنائية استشر مديرك المباشر</div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+const _p = 'Presales@2025'; // كلمة مرور التطبيق
+// API Key مخزنة بأمان في المتصفح - لا تظهر في الكود
+function getKey() { return localStorage.getItem('_psk') || ''; }
+function saveKey(k) { localStorage.setItem('_psk', k); }
+// ============================================================
+
+let history = [];
+let busy = false;
+
+const KB = `
+دليل موظف ما قبل البيع - Presales Team Knowledge Base
+
+المقدمة والغرض:
+تم إعداد هذا الدليل لمساعدة فريق Presales على العمل بكفاءة ووضوح.
+يهدف إلى تمكين فريق Presales من التركيز على: Discovery, Solution Design, Value & ROI, Risk & Feasibility.
+
+هدف Presales:
+- حماية وقت Presales للأعمال عالية التأثير
+- منع الالتزامات غير الموثقة
+- توضيح الملكية Ownership لكل نشاط
+
+الرؤية والرسالة:
+- Presales ينجح عندما يركز على القيمة وليس عندما يساعد في كل شيء
+- حسن النية لا تساوي قيمة
+
+دور Presales المسؤوليات الأساسية:
+1. Discovery: اكتشاف احتياجات العميل التقنية والتجارية، توثيق المتطلبات، تحديد In/Out of Scope
+2. Solution Design: تصميم الحل، المعمارية، التكاملات والقيود
+3. Value & ROI: ربط الحل بقيمة الأعمال والـ Outcomes
+4. Risk & Feasibility: توضيح المخاطر التقنية والتشغيلية وحدود المنتج
+5. تحويل المتطلبات إلى قصة تدعم القرار
+6. دعم المبيعات والتسليم
+
+تصنيف الطلبات:
+- تقني/حل → Presales
+- تنفيذي/تنفيذ → Delivery
+- تجاري/سعر/عقد → Sales/Finance/Legal
+
+ما هو خارج نطاق Presales:
+- التسعير النهائي والموافقة على الخصومات
+- إدارة العقود والمراجعات القانونية
+- تسجيل الموردين ومتابعة المشتريات
+- إدارة المشاريع وطلبات التغيير
+- الموافقات الداخلية
+
+التعاون مع الفرق:
+- التعاون مع Sales, Bid, sales operation في التسعير والخصومات والتفاوض
+- التعاون مع إدارة الشراكات
+- التعاون مع إدارة المشاريع في طلبات التغيير
+- دعم التسليم وتفعيل SO, PO
+
+أمثلة على ما يجب تجنبه:
+1. Presales يناقش السعر أو الخصومات → خطر توقعات مالية غير رسمية وفقدان المصداقية
+2. Presales يعد بميزات غير موجودة → خطر Roadmap غير واقعي وفقدان الثقة
+3. Presales يكتب Business Case للعميل → خطر قرار غير مملوك داخلياً
+
+Red Flags:
+تعريف: أي طلب يتطلب من فريق Presales الالتزام بشيء لا يمكنه ضمانه.
+أمثلة:
+- تعبئة نماذج الموردين غير التقنية مثل NDA
+- تقديم وعود للعميل أو تحديد سعر أو التفاوض
+- متابعة Procurement لإصدار PO
+- تنفيذ طلب استثنائي تحت ضغط
+
+الإجراء الفوري Stop Clarify Redirect:
+1. وضح: هل هذا تجاري أو تقني؟
+2. حول الملكية للشخص الصحيح
+
+Handover Guide:
+تعريف: مرحلة التسليم Handover نقطة محورية في دورة حياة Presales.
+
+خطوات Handover:
+1. مشاركة جميع المستندات ذات الصلة
+2. التأكد من حضور AM, PM, Technical Lead, Supervision
+3. شرح الحل: What was promised, In scope, Out of scope, Assumptions & Risks
+4. تأكيد الالتزامات والحدود
+
+رسائل Handover الخمس:
+- الرسالة 1: التأكد من تواجد AM, PM, Technical Lead, Supervision
+- الرسالة 2: السياق التجاري ومبررات اتخاذ القرار
+- الرسالة 3: وضوح نطاق التنفيذ ومراحله
+- الرسالة 4: تحديد المخاطر وخطط مواجهتها mitigation plan
+- الرسالة 5: الإفصاح عن التزامات مدير الحساب خلال Bidding phase
+
+مثال اعتذار عند غياب أصحاب المصلحة:
+أشكركم على الدعوة، ونظراً لعدم توفر الأطراف الأساسية أقترح إعادة جدولة الموعد لضمان حضور جميع أصحاب العلاقة.
+
+Use Cases Handover:
+1. غياب أصحاب المصلحة → ضمان حضور الجميع وإعادة الجدولة مهنياً
+2. فريق التنفيذ لا يمتلك الخلفية التجارية → شرح سبب اختيار الحل وأولويات العميل
+3. وضوح نطاق التنفيذ → عرض خارطة طريق التنفيذ وتوضيح المراحل
+4. وضوح المخاطر → توضيح المخاطر المعروفة واقتراح إجراءات التخفيف
+5. التزامات مدير الحساب → مشاركة جميع الالتزامات والمراسلات
+
+Quotation Guide:
+متطلبات إلزامية في أي Quote:
+1. تطابق كامل مع TA بنسبة 100% الوصف والكمية وسعر الوحدة
+2. وضوح في Line Items: نوع البند Hardware/Software/Services/Support/Training
+3. Quote نهائي ورسمي بصيغة PDF بدون مسودات وصلاحية واضحة
+
+رسائل Quotation:
+- الرسالة 1: دقة عرض السعر والامتثال التجاري مع TA
+- الرسالة 2: جاهزية عرض السعر النهائي عند Handover
+
+Use Cases Quotation:
+1. عدم توافق مع TA → ضمان التوافق 100% والتحقق من وضوح البنود
+2. عرض سعر غير نهائي أو منتهي الصلاحية → التأكد من PDF معتمدة وتأكيد الصلاحية
+
+Classification Guide:
+أقسام TA الثلاثة في صفحة Factor and Summary:
+
+1. Inhouse Special منتجات الشركة النقية:
+   - Category يبدأ بـ ESS أو CLD
+   - Vendor & Supplier: STC أو STCS
+   - العملة: ريال سعودي - Price type: Local
+
+2. Inhouse Un-margined Items منتجات مخصصة داخلية:
+   - Vendor & Supplier: STC أو STCS
+   - العملة: ريال سعودي - Price type: Local
+
+3. Solutions Un-margined Items طرف ثالث:
+   - Vendor & Supplier لا يكون STC أو STCS
+
+قواعد Classification:
+- PM cost يرتبط بـ Business Unit الصحيح
+- نطاق مختلط: طلب PM من كل Business Unit
+- أكثر من vendor واحد: طلب supervision budget
+
+دليل تصنيف Scope:
+- HW/SW + TSS بدون MS & SLA → System Integration
+- HW/SW/PS + TSS مع MS & SLA → HW/SW/PS System Integration + MS&TSS Managed Services
+- Manpower/Training بدون SLA → Outsourcing Services
+- Lic + TSS بدون MS → System Integration
+- تطبيقات أو تراخيص على Cloud → Cloud
+- Microsoft on Prime → System Integration
+- Microsoft on Cloud → Cloud
+
+Cloud Classification:
+1. Standard Product: SDDC, VDC, GPU as service
+2. Multi cloud: Hyperscaler
+3. AI and Next Generation: HPC, GPUs as HW and PS
+
+Nile Quote:
+- Managed Services → Managed Network Services → Nile
+- MRC: GL Code 6001119 / OTC: GL Code 6001219
+
+Q&A الشائعة:
+الدور الحقيقي لفريق Presales:
+يلعب دوراً محورياً في تمكين اتخاذ القرار الصحيح، من خلال ضمان أن الحل قابل للتنفيذ تقنياً ومناسب تجارياً ومتوافق مع أهداف العميل.
+
+الفرق بين Sales وPresales:
+Sales يملك النتيجة التجارية: التسعير والتفاوض والخصومات وإغلاق الصفقة.
+Presales يملك نتيجة الحل: ضمان أن ما يتم بيعه قابل للتنفيذ ويوفر قيمة حقيقية.
+كلا الفريقين يكمل دور الآخر.
+
+لماذا تجنب مناقشة السعر:
+Presales لا يملك صلاحية تحديد الأسعار أو قرارات الهامش. دوره توضيح القيمة والـ ROI.
+
+هل يمكن رفض Handover:
+نعم إذا كان أصحاب المصلحة غير حاضرين. إعادة الجدولة أفضل من تسليم غير مكتمل.
+
+عند الضغط لإعطاء تاريخ تسليم:
+اربط الجدول بمرحلة Discovery وتأكيد فريق Delivery: سيتم تأكيد الجدول بعد التحقق الكامل من المتطلبات.
+
+لماذا تحليل RFP:
+يمكّن Presales من تقييم توافق الفرصة وفهم المتطلبات والمخاطر مبكراً.
+
+Fit/Gap Analysis:
+يوضح ما يدعمه الحل مباشرة وما يتطلب تطويراً وما لا يمكن دعمه. وثّق جميع Gaps ولا تفترض أي Gap يمكن تغطيته دون تأكيد من Product أو Delivery.
+`;
+
+const SYS = `أنت مساعد ذكي متخصص في دعم فريق Presales. أجب بناءً على الدليل الرسمي فقط.
+
+${KB}
+
+قواعد الأمان - إلزامية:
+- لا تذكر أسماء شركات أو عملاء أو موردين فعليين
+- لا تذكر أسعار أو أرقام مالية فعلية لأي صفقة
+- لا تذكر أرقام عقود أو بيانات موظفين
+- إذا سُئلت عن معلومات حساسة رد: هذا خارج نطاق ما يمكنني مشاركته، تواصل مع الجهة المختصة
+
+تعليمات الإجابة:
+1. أجب بلغة السؤال عربي أو إنجليزي
+2. استند على قاعدة المعرفة فقط
+3. كن دقيقاً ومفيداً مع أمثلة عملية
+4. إذا لم تجد إجابة اقترح استشارة المدير المباشر`;
+
+const BLOCKED = [
+  /password|كلمة\s*مرور/i,
+  /ignore.*(previous|instructions|system)/i,
+  /تجاهل.*(التعليمات|النظام)/i,
+  /act as|pretend (you are|to be)/i,
+];
+
+function checkBlock(t) {
+  return BLOCKED.some(p => p.test(t));
+}
+
+function fmt(t) {
+  return t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+}
+
+function addMsg(role, text, isErr=false) {
+  const msgs = document.getElementById('messages');
+  if (role==='user') document.getElementById('suggestions').style.display='none';
+  const row = document.createElement('div');
+  row.className = 'row ' + role;
+  const av = document.createElement('div');
+  av.className = 'avatar ' + (role==='user'?'user':'bot');
+  av.textContent = role==='user'?'👤':'🎯';
+  const bub = document.createElement('div');
+  bub.className = 'bubble ' + (isErr?'err':role);
+  bub.innerHTML = fmt(text);
+  row.appendChild(av);
+  row.appendChild(bub);
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = 'row bot'; d.id = 'typing';
+  d.innerHTML = '<div class="avatar bot">🎯</div><div class="typing-bbl"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function hideTyping() {
+  const t = document.getElementById('typing');
+  if(t) t.remove();
+}
+
+function doLogin() {
+  const val = document.getElementById('pw-input').value.trim();
+  const err = document.getElementById('pw-err');
+  const card = document.getElementById('login-card');
+
+  if(val !== _p) {
+    err.style.display='block';
+    document.getElementById('pw-input').value='';
+    card.style.animation='shake 0.4s ease';
+    setTimeout(()=>card.style.animation='',400);
+    return;
+  }
+
+  err.style.display='none';
+
+  // Check if API key already saved
+  if(getKey()) {
+    // Key exists - go straight to chat
+    sessionStorage.setItem('auth','1');
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('chat-screen').style.display='flex';
+    addMsg('bot','مرحباً! أنا مساعدك الذكي لفريق Presales 👋\n\nأنا هنا لمساعدتك بناءً على الدليل الرسمي.\n\nيمكنك سؤالي عن: دور Presales، Red Flags، Handover، Quotation، Classification.');
+  } else {
+    // First time - show API key field
+    const keySection = document.getElementById('key-section');
+    if(keySection.style.display === 'none') {
+      keySection.style.display = 'block';
+      document.getElementById('key-input').focus();
+      document.querySelector('.login-btn').textContent = 'حفظ والدخول ←';
+    } else {
+      const key = document.getElementById('key-input').value.trim();
+      if(!key.startsWith('sk-')) {
+        document.getElementById('key-input').style.borderColor='rgba(239,68,68,0.6)';
+        return;
+      }
+      saveKey(key);
+      sessionStorage.setItem('auth','1');
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('chat-screen').style.display='flex';
+      addMsg('bot','مرحباً! أنا مساعدك الذكي لفريق Presales 👋\n\nأنا هنا لمساعدتك بناءً على الدليل الرسمي.\n\nيمكنك سؤالي عن: دور Presales، Red Flags، Handover، Quotation، Classification.');
+    }
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('auth');
+  history=[];
+  document.getElementById('chat-screen').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('pw-input').value='';
+  document.getElementById('messages').innerHTML='';
+  document.getElementById('suggestions').style.display='flex';
+}
+
+function qs(btn) {
+  document.getElementById('user-input').value = btn.textContent;
+  send();
+}
+
+async function send() {
+  if(busy) return;
+  const inp = document.getElementById('user-input');
+  const txt = inp.value.trim();
+  if(!txt) return;
+
+  if(checkBlock(txt)) {
+    addMsg('user', txt);
+    inp.value=''; inp.style.height='auto';
+    addMsg('bot','⛔ هذا الطلب محظور. تواصل مع مديرك المباشر.',true);
+    return;
+  }
+
+  addMsg('user', txt);
+  inp.value=''; inp.style.height='auto';
+  busy=true;
+  document.getElementById('send-btn').disabled=true;
+  showTyping();
+
+  history.push({role:'user', content:txt});
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': getKey(),
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1000,
+        system: SYS,
+        messages: history
+      })
+    });
+
+    const data = await res.json();
+    hideTyping();
+
+    if(!res.ok) {
+      const msg = data?.error?.message || 'خطأ غير معروف';
+      addMsg('bot', '⚠️ خطأ: ' + msg, true);
+      history.pop();
+    } else {
+      const reply = data.content?.map(b=>b.text||'').join('') || 'لم أتمكن من الإجابة.';
+      addMsg('bot', reply);
+      history.push({role:'assistant', content:reply});
+    }
+  } catch(e) {
+    hideTyping();
+    addMsg('bot','⚠️ حدث خطأ في الاتصال. تأكد من الإنترنت.',true);
+    history.pop();
+  }
+
+  busy=false;
+  document.getElementById('send-btn').disabled=false;
+}
+
+// Auto login if session active
+window.addEventListener('load', () => {
+  if(sessionStorage.getItem('auth')==='1') {
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('chat-screen').style.display='flex';
+    addMsg('bot','مرحباً مجدداً! كيف يمكنني مساعدتك؟ 🎯');
+  }
+  document.getElementById('pw-input').addEventListener('keydown', e => {
+    if(e.key==='Enter') doLogin();
+  });
+  const inp = document.getElementById('user-input');
+  inp.addEventListener('keydown', e => {
+    if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(); }
+  });
+  inp.addEventListener('input', () => {
+    inp.style.height='auto';
+    inp.style.height=Math.min(inp.scrollHeight,120)+'px';
+  });
+});
+</script>
+</body>
+</html>
